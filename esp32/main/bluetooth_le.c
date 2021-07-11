@@ -381,13 +381,22 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event,
 {
   switch (event)
   {
-  case ESP_GATTS_REG_EVT:
-    esp_ble_gap_set_device_name(NPSR_CAR_DEVICE_NAME);
+  case ESP_GATTS_REG_EVT: {
+    uint8_t derived_mac_addr[6];
+    esp_read_mac(derived_mac_addr, ESP_MAC_BT);
+
+    char device_name[64];
+    snprintf(device_name, 64, "%s_%x%x%x%x",
+             NPSR_CAR_DEVICE_NAME, derived_mac_addr[1], derived_mac_addr[3],
+             derived_mac_addr[4], derived_mac_addr[5]);
+    esp_ble_gap_set_device_name(device_name);
+
     //generate a resolvable random address
     esp_ble_gap_config_local_privacy(true);
     esp_ble_gatts_create_attr_tab(npsr_car_gatt_db, gatts_if,
                                   NPSR_CAR_NB, NPSR_CAR_SVC_INST_ID);
     break;
+  }
   case ESP_GATTS_READ_EVT:
       ESP_LOGI(GATTS_TABLE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
       esp_gatt_rsp_t rsp;
