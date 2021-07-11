@@ -43,7 +43,7 @@ static uint8_t test_manufacturer[4] = {'N', 'P', 'S', 'R'};
 static uint8_t sec_service_uuid[16] = {
   /* LSB <--------------------------------------------------------------------------------> MSB */
   //first uuid, 16bit, [12],[13] is the value
-  0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xEE, 0x00, 0x00, 0x00,
+  0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x73, 0x37, 0x00, 0x00, 0x00,
 };
 
 // config adv data
@@ -124,20 +124,20 @@ const uint8_t char_prop_read_write_notify = ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_G
 const uint8_t char_prop_write             = ESP_GATT_CHAR_PROP_BIT_WRITE;
 const uint8_t char_prop_write_notify      = ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
 
-const uint16_t NPSR_CAR_uuid                    = 0x00FF;
-static const uint16_t NPSR_CAR_CHAR_config_uuid = 0xFF01;     
+const uint16_t NPSR_CAR_uuid                    = 0x0073;
+static const uint16_t NPSR_CAR_REMOTE_CHAR_uuid = 0x7300;     
 
-static uint8_t NPSR_CAR_CHAR_config_ccc[2]      = {0x00,0x00};
+static uint8_t NPSR_CAR_REMOTE_CHAR_ccc[2]      = {0x00,0x00};
 
-/// Full HRS Database Description - Used to add attributes into the database
+/// Services and Characteristics Description - Used to add attributes into the database
 static const esp_gatts_attr_db_t npsr_car_gatt_db[NPSR_CAR_NB] =
 {
   [NPSR_CAR_SVC] = {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *) &primary_service_uuid, ESP_GATT_PERM_READ, sizeof(uint16_t), sizeof(NPSR_CAR_uuid), (uint8_t *)&NPSR_CAR_uuid}},
 
 	[CAR_REMOTE_CHAR] = {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *) &character_declaration_uuid, ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write_notify}},
-  [CAR_REMOTE_VAL] = {{ESP_GATT_RSP_BY_APP}, {ESP_UUID_LEN_16, (uint8_t *) &NPSR_CAR_CHAR_config_uuid, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, sizeof(uint16_t), 0, NULL}},
+  [CAR_REMOTE_VAL] = {{ESP_GATT_RSP_BY_APP}, {ESP_UUID_LEN_16, (uint8_t *) &NPSR_CAR_REMOTE_CHAR_uuid, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, sizeof(uint16_t), 0, NULL}},
   [CAR_REMOTE_DESCR] = {{ESP_GATT_RSP_BY_APP}, {ESP_UUID_LEN_16, (uint8_t *) &character_description, ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, 0, NULL}},
-	[CAR_REMOTE_CFG] = {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *) &character_client_config_uuid, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, sizeof(uint16_t), sizeof(NPSR_CAR_CHAR_config_ccc), (uint8_t *)NPSR_CAR_CHAR_config_ccc}},
+	[CAR_REMOTE_CFG] = {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *) &character_client_config_uuid, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, sizeof(uint16_t), sizeof(NPSR_CAR_REMOTE_CHAR_ccc), (uint8_t *)NPSR_CAR_REMOTE_CHAR_ccc}},
 };
 
 static char *esp_key_type_to_str(esp_ble_key_type_t key_type)
@@ -389,6 +389,17 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                                   NPSR_CAR_NB, NPSR_CAR_SVC_INST_ID);
     break;
   case ESP_GATTS_READ_EVT:
+      ESP_LOGI(GATTS_TABLE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
+      esp_gatt_rsp_t rsp;
+      memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
+      rsp.attr_value.handle = param->read.handle;
+      rsp.attr_value.len = 4;
+      rsp.attr_value.value[0] = 0xde;
+      rsp.attr_value.value[1] = 0xed;
+      rsp.attr_value.value[2] = 0xbe;
+      rsp.attr_value.value[3] = 0xef;
+      esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
+                                  ESP_GATT_OK, &rsp);
     break;
   case ESP_GATTS_WRITE_EVT:
     ESP_LOGI(GATTS_TABLE_TAG, "GATT_WRITE_EVT, value len %d", param->write.len);
