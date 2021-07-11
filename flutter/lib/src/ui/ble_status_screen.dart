@@ -11,22 +11,28 @@ class BleStatusScreen extends StatelessWidget {
       case BleStatus.unsupported:
         return "This device does not support Bluetooth";
       case BleStatus.unauthorized:
-        return "Authorize the FlutterReactiveBle example app to use Bluetooth and location";
+        return "Please authorize this app for using Bluetooth and Location";
       case BleStatus.poweredOff:
-        return "Bluetooth is powered off on your device turn it on";
+        return "Bluetooth is powered off";
       case BleStatus.locationServicesDisabled:
-        return "Enable location services";
+        return "Please enable Location services";
       case BleStatus.ready:
-        return "Bluetooth is up and running";
+        return "Bluetooth is ready";
       default:
-        return "Waiting to fetch Bluetooth status $status";
+        return "Fetching Bluetooth status...";
     }
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
         body: Center(
-          child: Text(determineText(status)),
+          child: Text(
+            determineText(status),
+            style: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       );
 }

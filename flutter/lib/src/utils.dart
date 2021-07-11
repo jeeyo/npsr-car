@@ -1,1 +1,1 @@
-void log(String text) => print("[FlutterReactiveBLEApp] $text");
+void log(String text) => print("[NpsrCar] $text");

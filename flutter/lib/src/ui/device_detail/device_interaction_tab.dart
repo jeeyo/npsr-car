@@ -81,6 +81,7 @@ class _DeviceInteractionTabState extends State<_DeviceInteractionTab> {
   void initState() {
     discoveredServices = [];
     super.initState();
+    widget.viewModel.connect();
   }
 
   Future<void> discoverServices() async {
@@ -96,167 +97,69 @@ class _DeviceInteractionTabState extends State<_DeviceInteractionTab> {
           SliverList(
             delegate: SliverChildListDelegate.fixed(
               [
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                      top: 8.0, bottom: 16.0, start: 16.0),
-                  child: Text(
-                    "ID: ${widget.viewModel.deviceId}",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 16.0),
-                  child: Text(
-                    "Status: ${widget.viewModel.connectionStatus}",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsetsDirectional.only(
+                //       top: 8.0, bottom: 16.0, start: 16.0),
+                //   child: Text(
+                //     "ID: ${widget.viewModel.deviceId}",
+                //     style: const TextStyle(fontWeight: FontWeight.bold),
+                //   ),
+                // ),
+                // Padding(
+                //   padding: const EdgeInsetsDirectional.only(start: 16.0),
+                //   child: Text(
+                //     "Status: ${widget.viewModel.connectionStatus}",
+                //     style: const TextStyle(fontWeight: FontWeight.bold),
+                //   ),
+                // ),
+                // Padding(
+                //   padding: const EdgeInsets.only(top: 16.0),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //     children: <Widget>[
+                //       ElevatedButton(
+                //         onPressed: !widget.viewModel.deviceConnected
+                //             ? widget.viewModel.connect
+                //             : null,
+                //         child: const Text("Connect"),
+                //       ),
+                //       ElevatedButton(
+                //         onPressed: widget.viewModel.deviceConnected
+                //             ? widget.viewModel.disconnect
+                //             : null,
+                //         child: const Text("Disconnect"),
+                //       ),
+                //       ElevatedButton(
+                //         onPressed: widget.viewModel.deviceConnected
+                //             ? discoverServices
+                //             : null,
+                //         child: const Text("Discover Services"),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: !widget.viewModel.deviceConnected
-                            ? widget.viewModel.connect
-                            : null,
-                        child: const Text("Connect"),
-                      ),
-                      ElevatedButton(
-                        onPressed: widget.viewModel.deviceConnected
-                            ? widget.viewModel.disconnect
-                            : null,
-                        child: const Text("Disconnect"),
-                      ),
-                      ElevatedButton(
-                        onPressed: widget.viewModel.deviceConnected
-                            ? discoverServices
-                            : null,
-                        child: const Text("Discover Services"),
-                      ),
-                    ],
-                  ),
+                  child: widget.viewModel.deviceConnected
+                      ? CharacteristicInteractionDialog(
+                          characteristic: QualifiedCharacteristic(
+                            characteristicId: Uuid.parse(
+                                '00007300-0000-1000-8000-00805f9b34fb'),
+                            serviceId: Uuid.parse(
+                                '00000073-0000-1000-8000-00805f9b34fb'),
+                            deviceId: widget.viewModel.deviceId,
+                          ),
+                        )
+                      : Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [CircularProgressIndicator()],
+                          ),
+                        ),
                 ),
-                if (widget.viewModel.deviceConnected)
-                  _ServiceDiscoveryList(
-                    deviceId: widget.viewModel.deviceId,
-                    discoveredServices: discoveredServices,
-                  ),
               ],
             ),
           ),
         ],
       );
-}
-
-class _ServiceDiscoveryList extends StatefulWidget {
-  const _ServiceDiscoveryList({
-    required this.deviceId,
-    required this.discoveredServices,
-    Key? key,
-  }) : super(key: key);
-
-  final String deviceId;
-  final List<DiscoveredService> discoveredServices;
-
-  @override
-  _ServiceDiscoveryListState createState() => _ServiceDiscoveryListState();
-}
-
-class _ServiceDiscoveryListState extends State<_ServiceDiscoveryList> {
-  late final List<int> _expandedItems;
-
-  @override
-  void initState() {
-    _expandedItems = [];
-    super.initState();
-  }
-
-  Widget _characteristicTile(QualifiedCharacteristic characteristic) =>
-      ListTile(
-        onTap: () => showDialog<void>(
-            context: context,
-            builder: (context) => CharacteristicInteractionDialog(
-                  characteristic: characteristic,
-                )),
-        title: Text(
-          '${characteristic.characteristicId}',
-          style: const TextStyle(
-            fontSize: 14,
-          ),
-        ),
-      );
-
-  List<ExpansionPanel> buildPanels() {
-    final panels = <ExpansionPanel>[];
-
-    widget.discoveredServices.asMap().forEach(
-          (index, service) => panels.add(
-            ExpansionPanel(
-              body: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Padding(
-                    padding: EdgeInsetsDirectional.only(start: 16.0),
-                    child: Text(
-                      'Characteristics',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) => _characteristicTile(
-                      QualifiedCharacteristic(
-                        characteristicId: service.characteristicIds[index],
-                        serviceId: service.serviceId,
-                        deviceId: widget.deviceId,
-                      ),
-                    ),
-                    itemCount: service.characteristicIds.length,
-                  ),
-                ],
-              ),
-              headerBuilder: (context, isExpanded) => ListTile(
-                title: Text(
-                  '${service.serviceId}',
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
-              isExpanded: _expandedItems.contains(index),
-            ),
-          ),
-        );
-
-    return panels;
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.discoveredServices.isEmpty
-      ? const SizedBox()
-      : Padding(
-          padding: const EdgeInsetsDirectional.only(
-            top: 20.0,
-            start: 20.0,
-            end: 20.0,
-          ),
-          child: ExpansionPanelList(
-            expansionCallback: (int index, bool isExpanded) {
-              setState(() {
-                setState(() {
-                  if (isExpanded) {
-                    _expandedItems.remove(index);
-                  } else {
-                    _expandedItems.add(index);
-                  }
-                });
-              });
-            },
-            children: [
-              ...buildPanels(),
-            ],
-          ),
-        );
 }

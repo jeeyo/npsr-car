@@ -10,8 +10,6 @@ import 'package:provider/provider.dart';
 
 import 'src/ble/ble_logger.dart';
 
-const _themeColor = Colors.lightGreen;
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -60,9 +58,9 @@ void main() {
         ),
       ],
       child: MaterialApp(
-        title: 'Flutter Reactive BLE example',
-        color: _themeColor,
-        theme: ThemeData(primarySwatch: _themeColor),
+        title: 'NpsrCar',
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
         home: HomeScreen(),
       ),
     ),

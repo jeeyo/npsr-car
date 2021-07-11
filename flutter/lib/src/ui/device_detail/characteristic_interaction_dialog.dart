@@ -59,7 +59,7 @@ class _CharacteristicInteractionDialogState
   late String writeOutput;
   late String subscribeOutput;
   late TextEditingController textEditingController;
-  late StreamSubscription<List<int>>? subscribeStream;
+  StreamSubscription<List<int>>? subscribeStream;
 
   @override
   void initState() {
@@ -186,44 +186,121 @@ class _CharacteristicInteractionDialogState
 
   Widget get divider => const Padding(
         padding: EdgeInsets.symmetric(vertical: 12.0),
-        child: Divider(thickness: 2.0),
+        // child: Divider(thickness: 2.0),
       );
 
   @override
-  Widget build(BuildContext context) => Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              const Text(
-                'Select an operation',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(
-                  widget.characteristic.characteristicId.toString(),
-                ),
-              ),
-              divider,
-              ...readSection,
-              divider,
-              ...writeSection,
-              divider,
-              ...subscribeSection,
-              divider,
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 20.0),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: <Widget>[
+                Expanded(
                   child: ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('close')),
+                    onPressed: () => widget.writeWithoutResponse(
+                        widget.characteristic, ['0'.codeUnitAt(0)]),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const Icon(Icons.lock_open_sharp),
+                          const Padding(padding: EdgeInsets.only(top: 3.0)),
+                          const Text('Unlock'),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              )
-            ],
-          ),
+                const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => widget.writeWithoutResponse(
+                        widget.characteristic, ['1'.codeUnitAt(0)]),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const Icon(Icons.lock_sharp),
+                          const Padding(padding: EdgeInsets.only(top: 3.0)),
+                          const Text('Lock'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            divider,
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => widget.writeWithoutResponse(
+                        widget.characteristic, ['2'.codeUnitAt(0)]),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const Icon(Icons.toys_sharp),
+                          const Padding(padding: EdgeInsets.only(top: 3.0)),
+                          const Text('Rear Trunk'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
+                Expanded(
+                  child: ElevatedButton(
+                    // onPressed: () => widget.writeWithoutResponse(
+                    onPressed: null,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const Icon(Icons.support_agent_sharp),
+                          const Padding(padding: EdgeInsets.only(top: 3.0)),
+                          const Text('Custom'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // const Text(
+            //   'Select an operation',
+            //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            // ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(vertical: 8.0),
+            //   child: Text(
+            //     widget.characteristic.characteristicId.toString(),
+            //   ),
+            // ),
+            // divider,
+            // ...readSection,
+            // divider,
+            // ...writeSection,
+            // divider,
+            // ...subscribeSection,
+            // divider,
+            // Align(
+            //   alignment: Alignment.bottomRight,
+            //   child: Padding(
+            //     padding: const EdgeInsets.only(top: 20.0),
+            //     child: ElevatedButton(
+            //         onPressed: () => Navigator.of(context).pop(),
+            //         child: const Text('close')),
+            //   ),
+            // )
+          ],
         ),
       );
 }

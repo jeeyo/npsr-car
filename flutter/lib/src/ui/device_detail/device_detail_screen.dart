@@ -40,29 +40,8 @@ class _DeviceDetail extends StatelessWidget {
           child: Scaffold(
             appBar: AppBar(
               title: Text(device.name),
-              bottom: const TabBar(
-                tabs: [
-                  Tab(
-                    icon: Icon(
-                      Icons.bluetooth_connected,
-                    ),
-                  ),
-                  Tab(
-                    icon: Icon(
-                      Icons.find_in_page_sharp,
-                    ),
-                  ),
-                ],
-              ),
             ),
-            body: TabBarView(
-              children: [
-                DeviceInteractionTab(
-                  device: device,
-                ),
-                DeviceLogTab(),
-              ],
-            ),
+            body: DeviceInteractionTab(device: device),
           ),
         ),
       );
